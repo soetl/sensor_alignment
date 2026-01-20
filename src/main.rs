@@ -72,16 +72,16 @@ fn main() -> std::io::Result<()> {
         input_device.grab()?;
 
         match with_retry(
-            || event_loop(&mut input_device, &mut virtual_device, sin_a, cos_a),
+            || {
+                let res = event_loop(&mut input_device, &mut virtual_device, sin_a, cos_a);
+                let _ = input_device.ungrab();
+                res
+            },
             "Event loop",
             10,
         ) {
             Ok(_) => unreachable!(),
-            Err(err) => {
-                eprintln!("Event loop error: {}. Retry in 10 seconds", err);
-                let _ = input_device.ungrab();
-                std::thread::sleep(std::time::Duration::from_secs(10));
-            }
+            Err(_) => {}
         };
     }
 }
