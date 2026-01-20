@@ -90,13 +90,12 @@ fn with_retry<T, F>(mut action: F, name: &str, seconds: u64) -> std::io::Result<
 where
     F: FnMut() -> std::io::Result<T>,
 {
-    loop {
-        match action() {
-            Ok(v) => return Ok(v),
-            Err(e) => {
-                eprintln!("{name} failed: {e}. Retrying in {seconds} seconds...");
-                std::thread::sleep(std::time::Duration::from_secs(seconds));
-            }
+    match action() {
+        Ok(v) => return Ok(v),
+        Err(e) => {
+            eprintln!("{name} failed: {e}. Retrying in {seconds} seconds...");
+            std::thread::sleep(std::time::Duration::from_secs(seconds));
+            Err(e)
         }
     }
 }
